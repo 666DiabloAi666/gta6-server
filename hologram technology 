@@ -1,0 +1,145 @@
+# Project Structure:
+# celestial_hologram_system/
+# ├── backend/
+# │   ├── hologram_api.py
+# │   ├── test_hologram_api.py
+# └── fivem/
+#     ├── client.lua
+#     └── server.lua
+
+# === backend/hologram_api.py ===
+from fastapi import FastAPI, Request
+from pydantic import BaseModel
+import random
+
+app = FastAPI()
+
+class HologramQuery(BaseModel):
+    message: str
+
+class PurchaseRequest(BaseModel):
+    user_id: str
+    item: str
+
+def user_has_paid(user_id: str, item: str) -> bool:
+    # Stub: Replace with actual payment logic
+    return item == "basic_hologram"
+
+@app.post("/hologram/response")
+def respond(query: HologramQuery):
+    responses = [
+        "I am a projection from the future.",
+        "Mission data uploading...",
+        "Only the worthy may wield the Sword of Truth."
+    ]
+    return {"response": random.choice(responses)}
+
+@app.post("/purchase")
+def purchase_item(req: PurchaseRequest):
+    prices = {
+        "basic_hologram": 0,
+        "ai_hologram": 5,
+        "celestial_armor": 10,
+        "sword_of_truth": 7,
+        "full_package": 20
+    }
+    price = prices.get(req.item)
+    if price is None:
+        return {"error": "Invalid item"}
+
+    if user_has_paid(req.user_id, req.item):
+        return {"status": "ok", "unlocked": req.item}
+    else:
+        return {"status": "payment_required", "price": price}
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    response = await call_next(request)
+    print(f"{request.method} {request.url} - {response.status_code}")
+    return response
+
+
+# === backend/test_hologram_api.py ===
+from fastapi.testclient import TestClient
+from hologram_api import app
+
+client = TestClient(app)
+
+def test_hologram_response():
+    res = client.post("/hologram/response", json={"message": "Hello?"})
+    assert res.status_code == 200
+    assert "response" in res.json()
+
+def test_purchase_logic():
+    res = client.post("/purchase", json={"user_id": "testuser", "item": "celestial_armor"})
+    assert res.status_code == 200
+    data = res.json()
+    assert "status" in data
+
+
+# === fivem/client.lua ===
+RegisterNetEvent("celestial:activateArmor")
+AddEventHandler("celestial:activateArmor", function()
+    local ped = PlayerPedId()
+    UseParticleFxAssetNextCall("core")
+    StartParticleFxLoopedOnEntity("ent_amb_glow_yellow", ped, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.5, false, false, false)
+    SetEntityAlpha(ped, 180, false)
+    TriggerEvent("chat:addMessage", { args = {"[Armor]", "Celestial Armor equipped."} })
+end)
+
+
+-- Optional sword command
+displaySword = true
+RegisterCommand("sword", function()
+    local ped = PlayerPedId()
+    GiveWeaponToPed(ped, GetHashKey("WEAPON_KNIFE"), 1, false, true)
+    TriggerEvent("chat:addMessage", { args = {"[Sword]", "Sword of Truth summoned."} })
+end)
+
+
+# === fivem/server.lua ===
+RegisterCommand("armor", function(source, args)
+    local user_id = GetPlayerIdentifier(source)
+
+    PerformHttpRequest("http://127.0.0.1:8000/purchase", function(statusCode, body)
+        local data = json.decode(body)
+        if data.status == "ok" then
+            TriggerClientEvent("celestial:activateArmor", source)
+        else
+            TriggerClientEvent("chat:addMessage", source, {
+                args = {"[System]", "You need to pay $" .. data.price .. " to unlock Celestial Armor."}
+            })
+        end
+    end, "POST", json.encode({user_id = user_id, item = "celestial_armor"}), {
+        ["Content-Type"] = "application/json"
+    })
+end)
+
+
+The full package is now scaffolded. Here's what it includes:
+
+FastAPI Backend: For AI hologram responses and pricing enforcement
+
+Python Tests: Verifying hologram API and purchase logic
+
+FiveM Scripts:
+
+client.lua: Visual armor activation and sword summon
+
+server.lua: Pricing enforcement via FastAPI integration
+
+
+
+You can now:
+
+1. Launch the FastAPI server (uvicorn hologram_api:app)
+
+
+2. Run tests with pytest
+
+
+3. Connect your FiveM server and trigger /armor or /sword commands
+
+
+
+
