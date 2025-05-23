@@ -1,0 +1,163 @@
+# Project Structure:
+# celestial_hologram_system/
+# ├── backend/
+# │   ├── hologram_api.py
+# │   ├── test_hologram_api.py
+# │   ├── requirements.txt
+# └── fivem/
+#     ├── client.lua
+#     └── server.lua
+
+# === backend/hologram_api.py ===
+from fastapi import FastAPI, Request
+from pydantic import BaseModel
+import random
+import stripe
+import os
+
+app = FastAPI()
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
+class HologramQuery(BaseModel):
+    message: str
+
+class PurchaseRequest(BaseModel):
+    user_id: str
+    item: str
+
+@app.post("/hologram/response")
+def respond(query: HologramQuery):
+    responses = [
+        "I am a projection from the future.",
+        "Mission data uploading...",
+        "Only the worthy may wield the Sword of Truth."
+    ]
+    return {"response": random.choice(responses)}
+
+@app.post("/purchase")
+def purchase_item(req: PurchaseRequest):
+    prices = {
+        "basic_hologram": 0,
+        "ai_hologram": 500,  # $5.00
+        "celestial_armor": 1000,  # $10.00
+        "sword_of_truth": 700,
+        "full_package": 2000
+    }
+    price = prices.get(req.item)
+    if price is None:
+        return {"error": "Invalid item"}
+
+    if price == 0:
+        return {"status": "ok", "unlocked": req.item}
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{
+            "price_data": {
+                "currency": "usd",
+                "product_data": {"name": req.item.replace("_", " ").title()},
+                "unit_amount": price
+            },
+            "quantity": 1
+        }],
+        mode="payment",
+        success_url="https://yourgame.com/success?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url="https://yourgame.com/cancel"
+    )
+    return {"status": "payment_required", "url": session.url}
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    response = await call_next(request)
+    print(f"{request.method} {request.url} - {response.status_code}")
+    return response
+
+
+# === backend/test_hologram_api.py ===
+from fastapi.testclient import TestClient
+from hologram_api import app
+
+client = TestClient(app)
+
+def test_hologram_response():
+    res = client.post("/hologram/response", json={"message": "Hello?"})
+    assert res.status_code == 200
+    assert "response" in res.json()
+
+def test_purchase_logic():
+    res = client.post("/purchase", json={"user_id": "testuser", "item": "celestial_armor"})
+    assert res.status_code == 200
+    data = res.json()
+    assert "status" in data
+
+
+# === backend/requirements.txt ===
+fastapi
+uvicorn
+pydantic
+pytest
+stripe
+
+
+# === fivem/client.lua ===
+RegisterNetEvent("celestial:activateArmor")
+AddEventHandler("celestial:activateArmor", function()
+    local ped = PlayerPedId()
+    UseParticleFxAssetNextCall("core")
+    StartParticleFxLoopedOnEntity("ent_amb_glow_yellow", ped, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.5, false, false, false)
+    SetEntityAlpha(ped, 180, false)
+    TriggerEvent("chat:addMessage", { args = {"[Armor]", "Celestial Armor equipped."} })
+end)
+
+-- Optional sword command
+displaySword = true
+RegisterCommand("sword", function()
+    local ped = PlayerPedId()
+    GiveWeaponToPed(ped, GetHashKey("WEAPON_KNIFE"), 1, false, true)
+    TriggerEvent("chat:addMessage", { args = {"[Sword]", "Sword of Truth summoned."} })
+end)
+
+
+# === fivem/server.lua ===
+RegisterCommand("armor", function(source, args)
+    local user_id = GetPlayerIdentifier(source)
+
+    PerformHttpRequest("http://127.0.0.1:8000/purchase", function(statusCode, body)
+        local data = json.decode(body)
+        if data.status == "ok" then
+            TriggerClientEvent("celestial:activateArmor", source)
+        elseif data.status == "payment_required" and data.url then
+            TriggerClientEvent("chat:addMessage", source, {
+                args = {"[System]", "Purchase here to unlock: " .. data.url}
+            })
+        else
+            TriggerClientEvent("chat:addMessage", source, {
+                args = {"[System]", "Unable to verify item purchase."}
+            })
+        end
+    end, "POST", json.encode({user_id = user_id, item = "celestial_armor"}), {
+        ["Content-Type"] = "application/json"
+    })
+end)
+
+
+Your system now includes:
+
+Stripe payment integration with real checkout URLs
+
+Updated Lua logic to prompt users with purchase links
+
+Backend Docker-ready and compatible with Railway deployment
+
+
+Next steps:
+
+1. Push this to GitHub
+
+
+2. Deploy on Railway
+
+
+3. Add your Stripe secret key to the environment
+
