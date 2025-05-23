@@ -1,0 +1,92 @@
+:
+
+
+---
+
+1. Docker Folder Structure
+
+celestial_hologram_system/
+├── backend/
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── hologram_api.py
+│   └── test_hologram_api.py
+├── docker-compose.yml
+
+
+---
+
+2. backend/requirements.txt
+
+fastapi
+uvicorn
+pydantic
+pytest
+
+
+---
+
+3. backend/Dockerfile
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["uvicorn", "hologram_api:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+---
+
+4. docker-compose.yml
+
+version: "3.8"
+
+services:
+  hologram-backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+
+---
+
+5. Usage Instructions
+
+To build and run the full system:
+
+docker-compose up --build
+
+This will:
+
+Launch the FastAPI backend at http://localhost:8000
+
+Enable your FiveM server (via Lua HTTP request) to access purchase and AI endpoints
+
+
+
+---
+
+6. Next Steps (Optional Enhancements)
+
+Add NGINX as reverse proxy with HTTPS
+
+Use Stripe or PayPal API in user_has_paid() logic
+
+Deploy to VPS (DigitalOcean, Linode, etc.)
+
+Add a client dashboard (React/Next.js) to show purchases
+
+
+
+---
+
+
+
