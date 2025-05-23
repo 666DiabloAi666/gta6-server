@@ -1,0 +1,134 @@
+
+
+---
+
+# Celestial Hologram System
+
+A hologram-based FiveM mod that integrates AI-driven projections, unlockable Celestial Armor, and a Sword of Truth — powered by FastAPI and Stripe.
+
+---
+
+## Features
+
+- **In-game holograms** with projected effects
+- **AI response system** via FastAPI
+- **Stripe payment integration** to unlock items
+- **Client-side FX for armor and sword**
+- **Test suite** for backend logic
+
+---
+
+## Technologies
+
+- **Python FastAPI** (hologram backend + payments)
+- **Lua** (FiveM client/server scripts)
+- **Stripe** (secure payments)
+- **Docker** + **Railway** (deployment)
+
+---
+
+## Setup Instructions
+
+### 1. Clone the Project
+
+```bash
+git clone https://github.com/yourname/celestial_hologram_system.git
+cd celestial_hologram_system
+
+
+---
+
+2. Environment Variables
+
+Create .env (or set in Railway):
+
+STRIPE_SECRET_KEY=sk_test_...
+
+
+---
+
+3. Run Locally (Docker)
+
+docker-compose up --build
+
+Access FastAPI backend at:
+http://localhost:8000
+
+
+---
+
+4. Test the Backend
+
+cd backend
+pytest
+
+
+---
+
+5. Deploy to Railway
+
+1. Go to https://railway.app
+
+
+2. Click New Project > GitHub Repo
+
+
+3. Add STRIPE_SECRET_KEY in Railway → Variables
+
+
+4. Deploy and note the URL
+
+
+
+
+---
+
+6. In-Game Commands
+
+In your FiveM game:
+
+/armor – activates Celestial Armor (requires payment)
+
+/sword – grants Sword of Truth
+
+If unpaid, players are shown a Stripe checkout link
+
+
+
+---
+
+Roadmap
+
+Add AI voice hologram chat
+
+Save player purchases in DB
+
+NFT/token unlocks
+
+Multiplayer holographic events
+
+
+
+---
+
+License
+
+MIT – for personal and commercial use
+
+
+---
+
+Credits
+
+Built using:
+
+FastAPI
+
+FiveM Lua
+
+Stripe
+
+
+---
+
+
