@@ -1,0 +1,329 @@
+Gotcha! I'll extend the Pure CSS Trident 🔱 CPU Chip by adding a simple hardware configuration panel on the chip surface — like tiny buttons, switches, and LED indicators that represent hardware settings.
+
+
+---
+
+Here’s the updated code with:
+
+Configuration panel box on the chip surface
+
+Multiple toggle switches styled purely in CSS
+
+LED indicators (circles) that can glow
+
+A label area for “HW Config” to simulate a real setup zone
+
+
+
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pure CSS Trident 🔱 CPU Chip with HW Config</title>
+<style>
+  body {
+    background: #0d1117;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .chip {
+    position: relative;
+    width: 300px;
+    height: 260px;
+    background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+    border-radius: 30px;
+    box-shadow:
+      inset 0 0 20px #0af,
+      0 0 25px #08f,
+      0 0 40px #05f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Chip pins */
+  .chip::before, .chip::after {
+    content: '';
+    position: absolute;
+    border-radius: 3px;
+    background: #0af;
+    box-shadow:
+      0 0 8px #0af;
+  }
+  .chip::before {
+    top: 12px;
+    left: 20px;
+    width: 10px;
+    height: 80px;
+    box-shadow:
+      0 0 8px #0af,
+      30px 0 8px #0af,
+      60px 0 8px #0af,
+      90px 0 8px #0af,
+      120px 0 8px #0af;
+  }
+  .chip::after {
+    bottom: 12px;
+    right: 20px;
+    width: 10px;
+    height: 80px;
+    box-shadow:
+      0 0 8px #0af,
+      -30px 0 8px #0af,
+      -60px 0 8px #0af,
+      -90px 0 8px #0af,
+      -120px 0 8px #0af;
+  }
+
+  /* Trident container */
+  .trident {
+    position: relative;
+    width: 100px;
+    height: 140px;
+    z-index: 5;
+  }
+
+  /* Trident prongs */
+  .prong {
+    position: absolute;
+    bottom: 0;
+    width: 20px;
+    height: 100px;
+    background: linear-gradient(45deg, #0af, #05f);
+    border-radius: 5px 5px 0 0;
+    box-shadow: 0 0 10px #08f;
+    filter: drop-shadow(0 0 3px #0af);
+  }
+
+  .prong.left {
+    left: 0;
+    transform: skewX(-10deg);
+  }
+
+  .prong.center {
+    left: 40px;
+    width: 20px;
+    height: 120px;
+    background: linear-gradient(45deg, #0ff, #00ccff);
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 0 15px #0ff;
+    filter: drop-shadow(0 0 5px #0ff);
+  }
+
+  .prong.right {
+    right: 0;
+    transform: skewX(10deg);
+  }
+
+  /* Trident crossbar */
+  .crossbar {
+    position: absolute;
+    top: 60px;
+    left: 5px;
+    width: 90px;
+    height: 20px;
+    background: linear-gradient(90deg, #00ccff, #0088cc);
+    border-radius: 10px;
+    box-shadow: 0 0 10px #0af;
+  }
+
+  /* Trident base shaft */
+  .shaft {
+    position: absolute;
+    bottom: 0;
+    left: 45px;
+    width: 10px;
+    height: 40px;
+    background: linear-gradient(180deg, #00ccff, #004466);
+    border-radius: 3px;
+    box-shadow: 0 0 8px #0af inset;
+  }
+
+  /* Hardware Config Panel */
+  .hw-config {
+    position: absolute;
+    top: 30px;
+    right: 25px;
+    width: 140px;
+    height: 180px;
+    background: linear-gradient(135deg, #111a2b, #0a0f1a);
+    border-radius: 15px;
+    border: 2px solid #00ccff;
+    box-shadow:
+      0 0 12px #00ccff,
+      inset 0 0 8px #004466;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    z-index: 10;
+  }
+
+  .hw-config h2 {
+    font-size: 1.3rem;
+    color: #0ff;
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 6px #0ff;
+  }
+
+  /* Toggle Switch */
+  .toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 28px;
+    background: #222;
+    border-radius: 14px;
+    box-shadow: inset 0 0 8px #001122;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .toggle-switch:hover {
+    background: #005577;
+    box-shadow: inset 0 0 10px #00ccff;
+  }
+
+  /* Slider */
+  .toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background: #00ccff;
+    border-radius: 50%;
+    box-shadow:
+      0 0 8px #0ff,
+      inset 0 0 5px #0088aa;
+    transition: left 0.3s ease;
+  }
+
+  /* Checked state simulation */
+  .toggle-switch.active {
+    background: #00ccff;
+    box-shadow: inset 0 0 15px #00eeff;
+  }
+  .toggle-switch.active .toggle-slider {
+    left: 34px;
+    background: #004466;
+    box-shadow: inset 0 0 5px #002233;
+  }
+
+  /* Label & LED Container */
+  .config-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #0ff;
+    font-weight: 600;
+    text-shadow: 0 0 4px #00ccff;
+  }
+
+  /* LED Indicator */
+  .led {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #003344;
+    box-shadow: inset 0 0 6px #001122;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .led.on {
+    background: #00ffcc;
+    box-shadow:
+      0 0 12px #00ffcc,
+      inset 0 0 8px #009977;
+  }
+
+</style>
+</head>
+<body>
+  <div class="chip">
+    <div class="trident">
+      <div class="prong left"></div>
+      <div class="prong center"></div>
+      <div class="prong right"></div>
+      <div class="crossbar"></div>
+      <div class="shaft"></div>
+    </div>
+
+    <div class="hw-config" aria-label="Hardware Configuration Panel">
+      <h2>HW CONFIG</h2>
+
+      <div class="config-item">
+        <span>Turbo Mode</span>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active'); toggleLED('led1')">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+
+      <div class="config-item">
+        <span>Safe Boot</span>
+        <div class="toggle-switch" onclick="this.classList.toggle('active'); toggleLED('led2')">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+
+      <div class="config-item">
+        <span>Overclock</span>
+        <div class="toggle-switch" onclick="this.classList.toggle('active'); toggleLED('led3')">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+
+      <div class="config-item" style="justify-content: center; gap: 15px; margin-top: 12px;">
+        <div id="led1" class="led on" title="Turbo Mode LED"></div>
+        <div id="led2" class="led" title="Safe Boot LED"></div>
+        <div id="led3" class="led" title="Overclock LED"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle LEDs based on toggle switches
+    function toggleLED(id) {
+      const led = document.getElementById(id);
+      led.classList.toggle('on');
+    }
+  </script>
+</body>
+</html>
+
+
+---
+
+What’s new?
+
+HW Config panel on the right side inside the chip area, styled with glowing borders and shadows.
+
+Three toggle switches for Turbo Mode, Safe Boot, and Overclock, each clickable to toggle state.
+
+Corresponding LED indicators below that light up or dim according to the toggle.
+
+Smooth transitions and glowing effects to keep the cyber-tech vibe.
+
+
+
+---
+
+Try opening this in your browser — click toggles and watch LEDs switch on/off.
+
+Want me to add:
+
+Animated LED pulses?
+
+More config options or sliders?
+
+Integration with 5dlang or AGI microservice control logic simulation?
+
+
